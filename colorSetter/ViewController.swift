@@ -33,7 +33,7 @@ final class ViewController: UIViewController {
     // MARK: - IBAction
     @IBAction func changeSliderValue(_ sender: UISlider) {
         setColor()
-        sender.label?.text = getFormatLabel(for: sender.value)
+        sender.label?.text = getFormatLabel(for: sender)
     }
 
     @IBAction func getHex() {
@@ -56,7 +56,7 @@ final class ViewController: UIViewController {
             slider.minimumValue = 0
             slider.maximumValue = 1
             slider.setValue(0.2, animated: false)
-            slider.label?.text = getFormatLabel(for: slider.value)
+            slider.label?.text = getFormatLabel(for: slider)
         }
     }
     
@@ -67,8 +67,8 @@ final class ViewController: UIViewController {
                                                 alpha: 1)
     }
 
-    private func getFormatLabel(for value: Float) -> String {
-        String(format: "%.2f", value)
+    private func getFormatLabel(for slider: UISlider) -> String {
+        String(format: "%.2f", slider.value)
     }
 
     private func getHexFromRGB(red: Float, green: Float, blue: Float) -> String {
@@ -79,21 +79,13 @@ final class ViewController: UIViewController {
 }
 
 // MARK: - Extensions
-/*
-Основная идея - упростить взаимодействие с лэйблом при переключении слайдера, "прикрепив" конкретный лейбл к слайдеру.
-Теперь имея в экшен слайдер sender можно будет получить связанный с ним label и работать с ним.
-Изначально я сделал механику, которая в changeSliderValue меняет все значения лэйблов.
-Но решил, что это не очень эффективно - каждый раз переписывать все значения, когда меняется только одно.
-А связывать каждый слайдер со своим экшеном тоже не хочется, не универсально это как-то.
-Подсмотрел реализацию в интернете, вероятно как-то можно покрасивее сделать... Выглядит как костыль, но работает))
-*/
 extension UISlider {
     private static var _labels: [String: UILabel] = [:]
 
     var label: UILabel? {
         get {
             let tmpAddress = String(format: "%p", unsafeBitCast(self, to: Int.self))
-            return UISlider._labels[tmpAddress] ?? nil
+            return UISlider._labels[tmpAddress]
         }
         set(label) {
             let tmpAddress = String(format: "%p", unsafeBitCast(self, to: Int.self))
