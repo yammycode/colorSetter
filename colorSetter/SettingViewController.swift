@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ViewController: UIViewController {
+final class SettingViewController: UIViewController {
 
     // MARK: - IBOutlet
     @IBOutlet var colorRectangle: UIView!
@@ -21,6 +21,10 @@ final class ViewController: UIViewController {
     @IBOutlet var redValueLabel: UILabel!
     @IBOutlet var greenValueLabel: UILabel!
     @IBOutlet var blueValueLabel: UILabel!
+
+    // MARK: - Public Properties
+    var color: UIColor!
+    var delegate: SettingViewControllerDelegate!
     
     // MARK: - Override Methods
     override func viewDidLoad() {
@@ -35,36 +39,39 @@ final class ViewController: UIViewController {
         setColor()
         sender.label?.text = getFormatLabel(for: sender)
     }
-
-    @IBAction func getHex() {
-        let hex = getHexFromRGB(red: redSlider.value, green: greenSlider.value, blue: blueSlider.value)
-        showAlert(with: "Цвет в формате HEX", and: "\(hex)")
+    @IBAction func doneButtonPressed() {
+        delegate.setBackground(color: color)
+        dismiss(animated: true)
     }
-
-
+    
     // MARK: - Private Methods
     private func setupSliders() {
-        redSlider.minimumTrackTintColor = .red
-        greenSlider.minimumTrackTintColor = .green
-        blueSlider.minimumTrackTintColor = .blue
+        setSliderData(for: redSlider, trackColor: .red, withLabel: redValueLabel, andValue: color.rgba.red)
+        setSliderData(for: greenSlider, trackColor: .green, withLabel: greenValueLabel, andValue: color.rgba.green)
+        setSliderData(for: blueSlider, trackColor: .blue, withLabel: blueValueLabel, andValue: color.rgba.blue)
+    }
 
-        redSlider.label = redValueLabel
-        greenSlider.label = greenValueLabel
-        blueSlider.label = blueValueLabel
-
-        for slider in sliders {
-            slider.minimumValue = 0
-            slider.maximumValue = 1
-            slider.setValue(0.2, animated: false)
-            slider.label?.text = getFormatLabel(for: slider)
-        }
+    private func setSliderData(
+        for slider: UISlider,
+        trackColor: UIColor,
+        withLabel label: UILabel,
+        andValue value: Double
+    ) {
+        slider.minimumTrackTintColor = trackColor
+        slider.setValue(Float(value), animated: false)
+        slider.minimumValue = 0
+        slider.maximumValue = 1
+        slider.label = label
+        slider.label?.text = getFormatLabel(for: slider)
     }
     
     private func setColor() {
-        colorRectangle.backgroundColor = UIColor(red: CGFloat(redSlider.value),
-                                                green: CGFloat(greenSlider.value),
-                                                blue: CGFloat(blueSlider.value),
-                                                alpha: 1)
+        color = UIColor(red: CGFloat(redSlider.value),
+                        green: CGFloat(greenSlider.value),
+                        blue: CGFloat(blueSlider.value),
+                        alpha: 1)
+
+        colorRectangle.backgroundColor = color
     }
 
     private func getFormatLabel(for slider: UISlider) -> String {
@@ -72,29 +79,13 @@ final class ViewController: UIViewController {
     }
 
     private func getHexFromRGB(red: Float, green: Float, blue: Float) -> String {
-        // Подсмотрено на стэковерфлоу :)
         let rgb: Int = (Int)(red * 255)<<16 | (Int)(green * 255)<<8 | (Int)(blue * 255)<<0
         return String(format:"#%06x", rgb)
     }
 }
 
 // MARK: - Extensions
-extension UISlider {
-    private static var _labels: [String: UILabel] = [:]
-
-    var label: UILabel? {
-        get {
-            let tmpAddress = String(format: "%p", unsafeBitCast(self, to: Int.self))
-            return UISlider._labels[tmpAddress]
-        }
-        set(label) {
-            let tmpAddress = String(format: "%p", unsafeBitCast(self, to: Int.self))
-            UISlider._labels[tmpAddress] = label
-        }
-    }
-}
-
-extension ViewController {
+extension SettingViewController {
     private func showAlert(with title: String, and message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let closeAction = UIAlertAction(title: "Спасибо!", style: .default)
@@ -103,3 +94,4 @@ extension ViewController {
         present(alert, animated: true)
     }
 }
+
