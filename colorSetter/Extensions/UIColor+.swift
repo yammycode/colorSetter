@@ -1,5 +1,5 @@
 //
-//  UIColor+Extension.swift
+//  UIColor+.swift
 //  colorSetter
 //
 //  Created by Anton Saltykov on 23.08.2022.
